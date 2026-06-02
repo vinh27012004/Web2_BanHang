@@ -19,9 +19,9 @@ public class SecurityConfig {
                 // Public URLs
                 .requestMatchers("/", "/products", "/cart/**", "/css/**", "/js/**", "/images/**").permitAll()
                 // Admin URLs
-                .requestMatchers("/admin/**", "/stock/**", "/customers/**").hasRole("ADMIN")
-                // Staff URLs
-                .requestMatchers("/order/**").hasAnyRole("ADMIN", "STAFF")
+                .requestMatchers("/admin/**", "/stock/**").hasRole("ADMIN")
+                // Staff & Admin URLs
+                .requestMatchers("/order/**", "/customers/**").hasAnyRole("ADMIN", "STAFF")
                 // Other URLs require authentication
                 .anyRequest().authenticated()
             )

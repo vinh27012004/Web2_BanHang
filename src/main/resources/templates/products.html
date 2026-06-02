@@ -6,70 +6,144 @@
 <body>
     <div th:replace="~{fragments/header :: header}"></div>
     
-    <div class="container mt-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Danh sách sản phẩm</h2>
-            <button sec:authorize="hasRole('ADMIN')" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
-                <i class="bi bi-plus-circle"></i> Thêm sản phẩm
-            </button>
+    <div class="container mt-5">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-5">
+            <div>
+                <h1 class="page-title">Cửa hàng Sản phẩm</h1>
+                <p class="page-subtitle mb-0">Duyệt qua danh sách sản phẩm và quản lý xuất nhập giỏ hàng nhanh chóng</p>
+            </div>
+            <div>
+                <button sec:authorize="hasRole('ADMIN')" class="btn btn-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                    <i class="bi bi-plus-circle-fill me-2"></i> Thêm sản phẩm mới
+                </button>
+            </div>
+        </div>
+
+        <!-- Tìm kiếm và Lọc sản phẩm -->
+        <div class="card border-0 shadow-sm mb-5 p-3 bg-white">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                        <input type="text" id="searchInput" class="form-control border-start-0" placeholder="Tìm kiếm sản phẩm nhanh theo tên hoặc mã sản phẩm...">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <select id="priceFilter" class="form-select">
+                        <option value="all">Tất cả mức giá</option>
+                        <option value="low">Dưới 10,000đ</option>
+                        <option value="medium">10,000đ - 50,000đ</option>
+                        <option value="high">Trên 50,000đ</option>
+                    </select>
+                </div>
+            </div>
         </div>
 
         <!-- Modal thêm sản phẩm -->
         <div class="modal fade" id="addProductModal" tabindex="-1">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Thêm sản phẩm mới</h5>
+                        <h5 class="modal-title d-flex align-items-center">
+                            <i class="bi bi-box-seam me-2 text-primary"></i> Thêm sản phẩm mới
+                        </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body p-4">
                         <form id="addProductForm">
                             <div class="mb-3">
-                                <label for="code" class="form-label">Mã sản phẩm</label>
-                                <input type="text" class="form-control" id="code" name="code" required>
+                                <label for="code" class="form-label">Mã sản phẩm (duy nhất)</label>
+                                <input type="text" class="form-control" id="code" name="code" placeholder="Ví dụ: SP100..." required>
                             </div>
                             <div class="mb-3">
                                 <label for="name" class="form-label">Tên sản phẩm</label>
-                                <input type="text" class="form-control" id="name" name="name" required>
+                                <input type="text" class="form-control" id="name" name="name" placeholder="Ví dụ: Coca Cola lon..." required>
                             </div>
-                            <div class="mb-3">
-                                <label for="price" class="form-label">Giá</label>
-                                <input type="number" class="form-control" id="price" name="price" min="0" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="quantity" class="form-label">Số lượng</label>
-                                <input type="number" class="form-control" id="quantity" name="quantity" min="0" required>
+                            <div class="row">
+                                <div class="col-6 mb-3">
+                                    <label for="price" class="form-label">Đơn giá (VNĐ)</label>
+                                    <input type="number" class="form-control" id="price" name="price" min="0" placeholder="Giá bán..." required>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <label for="quantity" class="form-label">Số lượng nhập</label>
+                                    <input type="number" class="form-control" id="quantity" name="quantity" min="0" placeholder="Số lượng..." required>
+                                </div>
                             </div>
                         </form>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                        <button type="button" class="btn btn-primary" onclick="addProduct()">Thêm</button>
+                        <button type="button" class="btn btn-primary" onclick="addProduct()">Thêm mới</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-md-4 mb-4" th:each="product : ${products}">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title" th:text="${product.name}"></h5>
-                        <p class="card-text">
-                            Mã: <span th:text="${product.code}"></span><br>
-                            Giá: <span th:text="${#numbers.formatCurrency(product.price)}"></span><br>
-                            Số lượng: <span th:text="${product.quantity}"></span>
-                        </p>
-                        <div class="input-group mb-3">
-                            <input type="number" class="form-control" th:attr="data-product-id=${product.id}" min="1" th:max="${product.quantity}" value="1">
-                            <button class="btn btn-primary add-to-cart" th:attr="data-product-id=${product.id}">Thêm vào giỏ</button>
+        <!-- Grid Danh sách Sản phẩm -->
+        <div class="row" id="productGrid">
+            <div class="col-md-6 col-lg-4 mb-4 product-card-container" th:each="product : ${products}" 
+                 th:data-name="${#strings.toLowerCase(product.name)}"
+                 th:data-code="${#strings.toLowerCase(product.code)}"
+                 th:data-price="${product.price}">
+                <div class="card h-100 border-0 shadow-sm">
+                    <!-- Product Graphic Header (No actual images, let's make a beautiful card header with gradient) -->
+                    <div class="card-header-gradient d-flex align-items-center justify-content-center" 
+                         style="height: 120px; background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);">
+                        <i class="bi bi-box-seam" style="font-size: 3rem; color: #6366f1;"></i>
+                    </div>
+                    
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title fw-bold text-dark mb-0" th:text="${product.name}"></h5>
+                            <span class="badge-custom badge-info text-uppercase" th:text="${product.code}"></span>
+                        </div>
+                        
+                        <div class="mt-2 mb-4">
+                            <span class="text-secondary small">Giá bán:</span>
+                            <h4 class="text-primary fw-extrabold mb-2" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></h4>
+                            <span class="text-secondary small">
+                                Tồn kho: 
+                                <span th:class="${product.quantity <= 10} ? 'text-danger fw-bold' : 'text-success fw-bold'" 
+                                      th:text="${product.quantity} + ' sản phẩm'">
+                                </span>
+                            </span>
+                        </div>
+                        
+                        <div class="mt-auto">
+                            <!-- Out of stock badge -->
+                            <div th:if="${product.quantity <= 0}" class="alert alert-danger py-2 rounded-3 text-center mb-0 small fw-bold">
+                                Hết hàng trong kho
+                            </div>
+                            <!-- Input group to add to cart -->
+                            <div th:unless="${product.quantity <= 0}" class="input-group">
+                                <span class="input-group-text bg-light text-muted small border-end-0">SL</span>
+                                <input type="number" class="form-control text-center quantity-input" 
+                                       th:attr="data-product-id=${product.id}" 
+                                       min="1" th:max="${product.quantity}" value="1" 
+                                       style="max-width: 70px; border-radius: 0;">
+                                <button class="btn btn-primary add-to-cart flex-grow-1" th:attr="data-product-id=${product.id}">
+                                    <i class="bi bi-cart-plus me-1"></i> Thêm vào giỏ
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+            
+            <!-- Empty search result alert -->
+            <div id="noResultAlert" class="col-12 d-none">
+                <div class="alert alert-info text-center py-5 rounded-3">
+                    <i class="bi bi-search mb-3" style="font-size: 2rem; display: block;"></i>
+                    <h5>Không tìm thấy sản phẩm nào khớp với tìm kiếm của bạn!</h5>
+                    <p class="text-secondary mb-0">Thử thay đổi từ khóa hoặc mức lọc giá.</p>
+                </div>
+            </div>
         </div>
-        <div class="text-end mt-3">
-            <a href="/cart" class="btn btn-primary">Xem giỏ hàng</a>
+        
+        <div class="text-center mt-5 mb-5">
+            <a href="/cart" class="btn btn-success px-4 py-3 shadow-sm rounded-3">
+                <i class="bi bi-cart-check-fill me-2"></i> Tiến hành Xem Giỏ Hàng
+            </a>
         </div>
     </div>
 
@@ -78,9 +152,16 @@
             var token = $("meta[name='_csrf']").attr("content");
             var header = $("meta[name='_csrf_header']").attr("content");
 
+            // Xử lý thêm vào giỏ hàng
             $('.add-to-cart').click(function() {
                 var productId = $(this).data('product-id');
-                var quantity = $(this).prev('input').val();
+                var quantityInput = $(this).siblings('input.quantity-input');
+                var quantity = quantityInput.val();
+                
+                if (parseInt(quantity) < 1) {
+                    showToast('Cảnh báo', 'Số lượng sản phẩm không hợp lệ', 'warning');
+                    return;
+                }
                 
                 $.ajax({
                     url: '/cart/add',
@@ -93,24 +174,74 @@
                         xhr.setRequestHeader(header, token);
                     },
                     success: function(response) {
-                        alert('Đã thêm vào giỏ hàng');
+                        showToast('Thành công', 'Đã thêm sản phẩm vào giỏ hàng', 'success');
+                        quantityInput.val(1);
                     },
                     error: function(xhr) {
-                        alert('Lỗi: ' + xhr.responseText);
+                        showToast('Lỗi hệ thống', xhr.responseText || 'Không thể thêm sản phẩm', 'danger');
                     }
                 });
             });
+
+            // Tìm kiếm client-side nhanh chóng
+            $('#searchInput, #priceFilter').on('keyup change', function() {
+                var keyword = $('#searchInput').val().toLowerCase().trim();
+                var priceFilter = $('#priceFilter').val();
+                var visibleCards = 0;
+
+                $('.product-card-container').each(function() {
+                    var card = $(this);
+                    var name = card.data('name');
+                    var code = card.data('code');
+                    var price = parseFloat(card.data('price'));
+
+                    var matchesSearch = name.includes(keyword) || code.includes(keyword);
+                    var matchesPrice = true;
+
+                    if (priceFilter === 'low') {
+                        matchesPrice = price < 10000;
+                    } else if (priceFilter === 'medium') {
+                        matchesPrice = price >= 10000 && price <= 50000;
+                    } else if (priceFilter === 'high') {
+                        matchesPrice = price > 50000;
+                    }
+
+                    if (matchesSearch && matchesPrice) {
+                        card.removeClass('d-none');
+                        visibleCards++;
+                    } else {
+                        card.addClass('d-none');
+                    }
+                });
+
+                if (visibleCards === 0) {
+                    $('#noResultAlert').removeClass('d-none');
+                } else {
+                    $('#noResultAlert').addClass('d-none');
+                }
+            });
         });
 
+        // Thêm sản phẩm mới (Admin)
         function addProduct() {
             var token = $("meta[name='_csrf']").attr("content");
             var header = $("meta[name='_csrf_header']").attr("content");
             
+            var code = $('#code').val().trim();
+            var name = $('#name').val().trim();
+            var price = $('#price').val();
+            var quantity = $('#quantity').val();
+
+            if (!code || !name || !price || !quantity) {
+                showToast('Thiếu thông tin', 'Vui lòng nhập đầy đủ tất cả các trường', 'warning');
+                return;
+            }
+
             var formData = {
-                code: $('#code').val(),
-                name: $('#name').val(),
-                price: $('#price').val(),
-                quantity: $('#quantity').val()
+                code: code,
+                name: name,
+                price: price,
+                quantity: quantity
             };
 
             $.ajax({
@@ -121,14 +252,17 @@
                     xhr.setRequestHeader(header, token);
                 },
                 success: function(response) {
-                    alert('Thêm sản phẩm thành công');
-                    location.reload();
+                    $('#addProductModal').modal('hide');
+                    showToast('Thành công', 'Sản phẩm đã được tạo mới', 'success');
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1000);
                 },
                 error: function(xhr) {
-                    alert('Lỗi: ' + xhr.responseText);
+                    showToast('Lỗi lưu trữ', xhr.responseText || 'Không thể tạo mới sản phẩm', 'danger');
                 }
             });
         }
     </script>
 </body>
-</html> 
+</html>

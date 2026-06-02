@@ -5,36 +5,61 @@
 <body>
     <div th:replace="~{fragments/header :: header}"></div>
 
-    <div class="container mt-4">
-        <h2>Danh sách đơn hàng</h2>
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h1 class="page-title">Quản lý Hóa đơn</h1>
+                <p class="page-subtitle mb-0">Theo dõi toàn bộ hóa đơn đã xuất bán và thông tin người bán</p>
+            </div>
+            <a href="/products" class="btn btn-primary">
+                <i class="bi bi-cart-fill me-2"></i> Lập hóa đơn mới
+            </a>
+        </div>
 
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>ID Đơn hàng</th>
-                    <th>Ngày tạo</th>
-                    <th>Người bán</th>
-                    <th>Khách hàng</th>
-                    <th>Tổng tiền</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="order : ${orders}">
-                    <td th:text="${order.id}"></td>
-                    <td th:text="${#temporals.format(order.createdAt, 'dd-MM-yyyy HH:mm')}"></td>
-                    <td th:text="${order.user.fullName}"></td>
-                    <td>
-                        <span th:if="${order.customer}" th:text="${order.customer.name + ' - ' + order.customer.phone}"></span>
-                        <span th:unless="${order.customer}">Khách lẻ</span>
-                    </td>
-                    <td th:text="${#numbers.formatCurrency(order.totalAmount)}"></td>
-                    <td>
-                        <a th:href="@{/order/}+${order.id}" class="btn btn-info btn-sm">Chi tiết</a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="table-container border-0 shadow-sm">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width: 120px;">Mã hóa đơn</th>
+                        <th>Ngày giờ tạo</th>
+                        <th>Nhân viên thu ngân</th>
+                        <th>Khách hàng</th>
+                        <th class="text-end">Tổng tiền hóa đơn</th>
+                        <th class="text-center" style="width: 120px;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="order : ${orders}">
+                        <td class="fw-bold text-secondary" th:text="'#' + ${order.id}"></td>
+                        <td class="text-dark" th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                    <i class="bi bi-person-fill text-secondary"></i>
+                                </div>
+                                <span class="fw-semibold text-dark" th:text="${order.user.fullName}"></span>
+                            </div>
+                        </td>
+                        <td>
+                            <span th:if="${order.customer}" class="fw-semibold" th:text="${order.customer.name} + ' (' + ${order.customer.phone} + ')'"></span>
+                            <span th:unless="${order.customer}" class="text-muted small"><i class="bi bi-person-dash me-1"></i>Khách lẻ</span>
+                        </td>
+                        <td class="text-end fw-extrabold text-primary" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + 'đ'"></td>
+                        <td class="text-center">
+                            <a th:href="@{/order/}+${order.id}" class="btn btn-sm btn-outline-primary py-1 px-3">
+                                <i class="bi bi-eye-fill"></i> Chi tiết
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(orders)}">
+                        <td colspan="6" class="text-center text-muted py-5">
+                            <i class="bi bi-receipt-cutoff mb-3" style="font-size: 2rem; display: block;"></i>
+                            Hệ thống chưa ghi nhận bất kỳ hóa đơn bán hàng nào.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </body>
-</html> 
+</html>

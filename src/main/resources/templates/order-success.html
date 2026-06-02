@@ -5,16 +5,26 @@
 <body>
     <div th:replace="~{fragments/header :: header}"></div>
 
-    <div class="container mt-4">
-        <div class="alert alert-success" role="alert">
-            <h4 class="alert-heading">Đặt hàng thành công!</h4>
-            <p>Cảm ơn bạn đã đặt hàng. Đơn hàng của bạn đã được xử lý thành công.</p>
-            <hr>
-            <p class="mb-0"><a href="/products" class="alert-link">Tiếp tục mua sắm</a> hoặc <a href="/order" class="alert-link">Xem danh sách đơn hàng</a>.</p>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-7 col-lg-5">
+                <div class="card border-0 shadow-lg text-center p-5 rounded-4 mt-4">
+                    <div class="mb-4">
+                        <div class="d-inline-flex align-items-center justify-content-center bg-success-light text-success rounded-circle" style="width: 80px; height: 80px;">
+                            <i class="bi bi-check2-circle" style="font-size: 3.5rem;"></i>
+                        </div>
+                    </div>
+                    
+                    <h3 class="fw-extrabold text-dark mb-3">Giao dịch thành công!</h3>
+                    <p class="text-secondary mb-5 small">Đơn hàng của bạn đã được ghi nhận vào hệ thống POS và hàng đã được tự động cập nhật trừ kho thành công.</p>
+                    
+                    <div class="d-grid gap-3">
+                        <a href="/products" class="btn btn-primary py-3 rounded-3"><i class="bi bi-grid-3x3-gap-fill me-2"></i> Tiếp tục bán hàng</a>
+                        <a href="/order" class="btn btn-outline-secondary py-3 rounded-3"><i class="bi bi-receipt me-2"></i> Xem lịch sử hóa đơn</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html> 
+</html>

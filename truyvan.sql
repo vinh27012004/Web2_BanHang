@@ -37,8 +37,8 @@ CREATE TABLE product (
 -- Bảng khách hàng
 CREATE TABLE customer (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255),
-    phone VARCHAR(20),
+    name VARCHAR(255) NOT NULL,
+    phone VARCHAR(20) UNIQUE NOT NULL,
     email VARCHAR(100)
 );
 
@@ -76,6 +76,11 @@ CREATE TABLE stock_entry (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (product_id) REFERENCES product(id)
 );
+
+-- Chỉ mục tối ưu hóa hiệu năng truy vấn (Performance Indexes)
+CREATE INDEX idx_customer_phone ON customer(phone);
+CREATE INDEX idx_invoice_created_at ON invoice(created_at);
+CREATE INDEX idx_stock_entry_created_at ON stock_entry(created_at);
 
 -- Dữ liệu mẫu cho role
 INSERT INTO role (id, name) VALUES

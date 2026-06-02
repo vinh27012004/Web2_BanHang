@@ -60,4 +60,42 @@ public class CustomerController {
         model.addAttribute("customers", customers);
         return "customer/list";
     }
+
+    @GetMapping("/api/by-phone")
+    @ResponseBody
+    public org.springframework.http.ResponseEntity<Customer> getCustomerByPhone(@RequestParam String phone) {
+        List<Customer> list = customerService.searchByPhone(phone);
+        if (!list.isEmpty()) {
+            return org.springframework.http.ResponseEntity.ok(list.get(0));
+        }
+        return org.springframework.http.ResponseEntity.notFound().build();
+    }
+
+    @PostMapping("/api/add-quick")
+    @ResponseBody
+    public org.springframework.http.ResponseEntity<Customer> addCustomerQuick(
+            @RequestParam String name,
+            @RequestParam String phone,
+            @RequestParam(required = false) String email) {
+        try {
+            if (phone == null || phone.trim().isEmpty() || name == null || name.trim().isEmpty()) {
+                return org.springframework.http.ResponseEntity.badRequest().build();
+            }
+            
+            // Check for duplicate phone number
+            List<Customer> existing = customerService.searchByPhone(phone);
+            if (!existing.isEmpty()) {
+                return org.springframework.http.ResponseEntity.ok(existing.get(0));
+            }
+            
+            Customer customer = new Customer();
+            customer.setName(name);
+            customer.setPhone(phone);
+            customer.setEmail(email != null ? email : "");
+            Customer saved = customerService.saveCustomer(customer);
+            return org.springframework.http.ResponseEntity.ok(saved);
+        } catch (Exception e) {
+            return org.springframework.http.ResponseEntity.badRequest().build();
+        }
+    }
 } 

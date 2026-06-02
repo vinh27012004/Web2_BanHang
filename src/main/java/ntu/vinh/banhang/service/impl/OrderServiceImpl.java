@@ -4,6 +4,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.function.Function;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -47,12 +51,23 @@ public class OrderServiceImpl implements OrderService {
             .orElseThrow(() -> new RuntimeException("User not found"));
         invoice.setUser(currentUser);
         
+        // Tải trước tất cả sản phẩm liên quan bằng một truy vấn duy nhất (Batch Fetching)
+        List<Long> productIds = cartItems.stream()
+            .map(item -> item.getProduct().getId())
+            .collect(Collectors.toList());
+        List<Product> products = productRepository.findAllById(productIds);
+        Map<Long, Product> productMap = products.stream()
+            .collect(Collectors.toMap(Product::getId, Function.identity()));
+        
         double totalAmount = 0;
         List<InvoiceItem> invoiceItems = new ArrayList<>();
         
         for (CartItem cartItem : cartItems) {
-            Product product = productRepository.findById(cartItem.getProduct().getId())
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+            Long productId = cartItem.getProduct().getId();
+            Product product = productMap.get(productId);
+            if (product == null) {
+                throw new RuntimeException("Product not found with ID: " + productId);
+            }
             
             if (product.getQuantity() < cartItem.getQuantity()) {
                 throw new RuntimeException("Insufficient stock for product: " + product.getName());
@@ -68,9 +83,8 @@ public class OrderServiceImpl implements OrderService {
             invoiceItems.add(invoiceItem);
             totalAmount += invoiceItem.getTotalPrice();
             
-            // Update product quantity
+            // Cập nhật số lượng tồn kho trực tiếp trên entity được JPA quản lý (dirty checking sẽ tự động đồng bộ)
             product.setQuantity(product.getQuantity() - cartItem.getQuantity());
-            productRepository.save(product);
         }
         
         invoice.setTotalAmount(totalAmount);

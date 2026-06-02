@@ -5,58 +5,260 @@
 <body>
     <div th:replace="~{fragments/header :: header}"></div>
     
-    <div class="container mt-4">
-        <h2>Thanh toán</h2>
+    <div class="container mt-5">
+        <h1 class="page-title">Xác nhận thanh toán</h1>
+        <p class="page-subtitle">Nhập thông tin giao dịch và số tiền nhận từ khách hàng</p>
         
-        <div th:if="${error}" class="alert alert-danger" role="alert">
+        <div th:if="${error}" class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger rounded-3 p-3 mb-4 d-flex align-items-center">
+            <i class="bi bi-exclamation-triangle-fill me-2" style="font-size: 1.2rem;"></i>
             <span th:text="${error}"></span>
         </div>
         
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Sản phẩm</th>
-                    <th>Số lượng</th>
-                    <th>Giá</th>
-                    <th>Thành tiền</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="item : ${cartItems}">
-                    <td th:text="${item.product.name}"></td>
-                    <td th:text="${item.quantity}"></td>
-                    <td th:text="${#numbers.formatCurrency(item.product.price)}"></td>
-                    <td th:text="${#numbers.formatCurrency(item.totalPrice)}"></td>
-                </tr>
-            </tbody>
-            <tfoot>
-                <tr>
-                    <td colspan="3" class="text-end"><strong>Tổng cộng:</strong></td>
-                    <td th:text="${#numbers.formatCurrency(totalAmount)}"></td>
-                </tr>
-            </tfoot>
-        </table>
-        
-        <form th:action="@{/order/create}" method="post">
-            <div class="mb-3">
-                <label for="customer" class="form-label">Khách hàng (Tùy chọn):</label>
-                <select id="customer" name="customerId" class="form-select">
-                    <option value="">Chọn khách hàng</option>
-                    <option th:each="customer : ${customers}" 
-                            th:value="${customer.id}"
-                            th:text="${customer.name + ' - ' + customer.phone}">
-                    </option>
-                </select>
+        <div class="row g-4">
+            <!-- Cột bên trái: Biểu mẫu điền thông tin và thanh toán -->
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm p-4">
+                    <h5 class="fw-bold text-dark mb-4"><i class="bi bi-person-lines-fill text-primary me-2"></i> Thông tin hóa đơn</h5>
+                    
+                    <form th:action="@{/order/create}" method="post">
+                        <!-- Tìm kiếm khách hàng thành viên -->
+                        <div class="mb-4">
+                            <label for="customerPhoneInput" class="form-label">Số điện thoại khách hàng thành viên</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-phone"></i></span>
+                                <input type="tel" id="customerPhoneInput" class="form-control border-start-0 ps-0" placeholder="Nhập số điện thoại khách hàng...">
+                                <button type="button" id="searchCustomerBtn" class="btn btn-outline-primary"><i class="bi bi-search"></i> Kiểm tra</button>
+                            </div>
+                            <div id="customerStatusInfo" class="form-text mt-2 text-secondary">
+                                Để trống nếu là khách vãng lai / khách lẻ.
+                            </div>
+                            
+                            <!-- Khung đăng ký nhanh (ẩn mặc định) -->
+                            <div id="quickRegisterArea" class="mt-3 p-3 bg-light rounded-3 d-none border">
+                                <div class="small fw-bold text-dark mb-2"><i class="bi bi-person-plus-fill me-1 text-primary"></i> Đăng ký nhanh thành viên</div>
+                                <div class="row g-2">
+                                    <div class="col-8">
+                                        <input type="text" id="quickCustomerName" class="form-control form-control-sm" placeholder="Nhập họ và tên khách hàng...">
+                                    </div>
+                                    <div class="col-4">
+                                        <button type="button" id="submitQuickCustomerBtn" class="btn btn-sm btn-primary w-100">Lưu lại</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Lưu ID khách hàng được chọn -->
+                            <input type="hidden" id="customerId" name="customerId">
+                        </div>
+                        
+                        <!-- Số tiền nhận từ khách -->
+                        <div class="mb-4">
+                            <label for="customerPaidDisplay" class="form-label">Số tiền khách hàng đưa (VNĐ)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-cash-coin"></i></span>
+                                <input type="text" id="customerPaidDisplay" class="form-control border-start-0 ps-0" placeholder="Nhập số tiền nhận được..." required>
+                                <input type="hidden" id="customerPaid" name="customerPaid" required>
+                            </div>
+                        </div>
+
+                        <!-- Tính toán số tiền thối lại tự động bằng JS -->
+                        <div class="card bg-light border-0 p-3 mb-4">
+                            <div class="d-flex justify-content-between small text-secondary mb-1">
+                                <span>Tổng hóa đơn:</span>
+                                <span class="fw-bold text-dark" id="formattedTotal" th:text="${#numbers.formatDecimal(totalAmount, 0, 'COMMA', 0, 'POINT')} + 'đ'"></span>
+                            </div>
+                            <div class="d-flex justify-content-between small text-secondary mb-1">
+                                <span>Khách đưa:</span>
+                                <span class="fw-bold text-dark" id="formattedPaid">0đ</span>
+                            </div>
+                            <hr class="text-muted opacity-25 my-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-dark">Tiền thối lại:</span>
+                                <h4 class="fw-extrabold text-success mb-0" id="formattedChange">0đ</h4>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex gap-3">
+                            <a href="/cart" class="btn btn-secondary px-4 py-3 rounded-3 flex-grow-1 text-center"><i class="bi bi-arrow-left"></i> Quay lại giỏ</a>
+                            <button type="submit" class="btn btn-success px-4 py-3 rounded-3 flex-grow-2"><i class="bi bi-check2-all me-1"></i> Xác nhận và in hóa đơn</button>
+                        </div>
+                    </form>
+                </div>
             </div>
             
-            <div class="mb-3">
-                <label for="customerPaid" class="form-label">Số tiền khách trả:</label>
-                <input type="number" id="customerPaid" name="customerPaid" class="form-control" step="0.01" required>
+            <!-- Cột bên phải: Tóm tắt danh sách sản phẩm mua -->
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-light border-0">
+                        <span class="fw-bold text-dark"><i class="bi bi-cart3 text-primary me-2"></i> Giỏ hàng hiện tại</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush" style="max-height: 320px; overflow-y: auto;">
+                            <div th:each="item : ${cartItems}" class="list-group-item p-3 border-0 border-bottom">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="fw-bold text-dark mb-1" th:text="${item.product.name}"></h6>
+                                        <small class="text-secondary" th:text="${item.quantity} + ' x ' + ${#numbers.formatDecimal(item.product.price, 0, 'COMMA', 0, 'POINT')} + 'đ'"></small>
+                                    </div>
+                                    <span class="fw-bold text-dark" th:text="${#numbers.formatDecimal(item.totalPrice, 0, 'COMMA', 0, 'POINT')} + 'đ'"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-light">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-dark">Tổng cộng:</span>
+                                <h3 class="text-primary fw-extrabold mb-0" th:text="${#numbers.formatDecimal(totalAmount, 0, 'COMMA', 0, 'POINT')} + 'đ'"></h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            
-            <button type="submit" class="btn btn-success">Xác nhận thanh toán</button>
-             <a href="/cart" class="btn btn-secondary">Quay lại giỏ hàng</a>
-        </form>
+        </div>
     </div>
+
+    <!-- Hidden input helper to read numeric total in Javascript -->
+    <input type="hidden" id="totalAmountVal" th:value="${totalAmount}">
+
+    <script>
+        $(document).ready(function() {
+            var totalAmount = parseFloat($('#totalAmountVal').val());
+            
+            $('#customerPaidDisplay').on('input', function() {
+                var selectionStart = this.selectionStart;
+                var selectionEnd = this.selectionEnd;
+                var originalLength = this.value.length;
+                
+                // Remove all non-numeric characters to get clean raw number string
+                var rawValue = $(this).val().replace(/[^0-9]/g, '');
+                
+                if (rawValue === '') {
+                    $(this).val('');
+                    $('#customerPaid').val('');
+                    $('#formattedPaid').text('0đ');
+                    $('#formattedChange').text('0đ').removeClass('text-success').addClass('text-danger');
+                    return;
+                }
+                
+                var numValue = parseInt(rawValue, 10);
+                
+                // Format the display input with dots as thousand separators (e.g. 100.000)
+                var formatted = formatWithDots(numValue);
+                $(this).val(formatted);
+                
+                // Put the raw number in the hidden input for form submission
+                $('#customerPaid').val(numValue);
+                
+                // Keep cursor position adjusted for added dots
+                var newLength = formatted.length;
+                var cursorPosition = selectionStart + (newLength - originalLength);
+                this.setSelectionRange(cursorPosition, cursorPosition);
+                
+                // Update calculation displays
+                $('#formattedPaid').text(formatMoney(numValue) + 'đ');
+                
+                var change = numValue - totalAmount;
+                if (change < 0) {
+                    $('#formattedChange').text('0đ').removeClass('text-success').addClass('text-danger');
+                } else {
+                    $('#formattedChange').text(formatMoney(change) + 'đ').removeClass('text-danger').addClass('text-success');
+                }
+            });
+
+            // Tìm kiếm khách hàng thành viên bằng số điện thoại
+            function checkCustomer() {
+                var phone = $('#customerPhoneInput').val().trim();
+                var token = $("meta[name='_csrf']").attr("content");
+                var header = $("meta[name='_csrf_header']").attr("content");
+                
+                if (phone === '') {
+                    $('#customerId').val('');
+                    $('#customerStatusInfo').html('Để trống nếu là khách vãng lai / khách lẻ.').removeClass('text-success text-danger text-warning').addClass('text-secondary');
+                    $('#quickRegisterArea').addClass('d-none');
+                    return;
+                }
+                
+                $.ajax({
+                    url: '/customers/api/by-phone',
+                    type: 'GET',
+                    data: { phone: phone },
+                    success: function(customer) {
+                        // Tìm thấy khách hàng
+                        $('#customerId').val(customer.id);
+                        $('#customerStatusInfo').html('<span class="text-success fw-bold"><i class="bi bi-check-circle-fill"></i> Thành viên: ' + customer.name + '</span>').removeClass('text-secondary text-danger');
+                        $('#quickRegisterArea').addClass('d-none');
+                        showToast('Thành viên', 'Đã nhận diện thành viên: ' + customer.name, 'success');
+                    },
+                    error: function(xhr) {
+                        // Không tìm thấy khách hàng
+                        $('#customerId').val('');
+                        $('#customerStatusInfo').html('<span class="text-warning fw-bold"><i class="bi bi-exclamation-triangle-fill"></i> SĐT chưa đăng ký.</span> <a href="javascript:void(0)" id="quickRegisterBtn" class="text-decoration-underline fw-bold text-primary ms-1">Đăng ký nhanh?</a>').removeClass('text-secondary text-success');
+                        
+                        // Đăng ký nhanh click handler
+                        $('#quickRegisterBtn').click(function() {
+                            $('#quickRegisterArea').removeClass('d-none');
+                            $('#quickCustomerName').focus();
+                        });
+                    }
+                });
+            }
+
+            // Gọi kiểm tra khi click nút
+            $('#searchCustomerBtn').click(checkCustomer);
+
+            // Hoặc gọi kiểm tra khi gõ đủ số
+            $('#customerPhoneInput').on('input', function() {
+                var phone = $(this).val().trim();
+                var cleanPhone = phone.replace(/[^0-9]/g, '');
+                if (cleanPhone.length >= 9) {
+                    checkCustomer();
+                } else if (phone === '') {
+                    $('#customerId').val('');
+                    $('#customerStatusInfo').html('Để trống nếu là khách vãng lai / khách lẻ.').removeClass('text-success text-danger text-warning').addClass('text-secondary');
+                    $('#quickRegisterArea').addClass('d-none');
+                }
+            });
+
+            // Lưu nhanh khách hàng mới
+            $('#submitQuickCustomerBtn').click(function() {
+                var token = $("meta[name='_csrf']").attr("content");
+                var header = $("meta[name='_csrf_header']").attr("content");
+                var name = $('#quickCustomerName').val().trim();
+                var phone = $('#customerPhoneInput').val().trim();
+                
+                if (name === '') {
+                    showToast('Cảnh báo', 'Vui lòng nhập tên khách hàng mới', 'warning');
+                    return;
+                }
+                
+                $.ajax({
+                    url: '/customers/api/add-quick',
+                    type: 'POST',
+                    data: {
+                        name: name,
+                        phone: phone
+                    },
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader(header, token);
+                    },
+                    success: function(customer) {
+                        $('#customerId').val(customer.id);
+                        $('#customerStatusInfo').html('<span class="text-success fw-bold"><i class="bi bi-check-circle-fill"></i> Thành viên mới: ' + customer.name + '</span>');
+                        $('#quickRegisterArea').addClass('d-none');
+                        showToast('Thành công', 'Đăng ký thành viên mới thành công!', 'success');
+                    },
+                    error: function(xhr) {
+                        showToast('Thất bại', 'Không thể đăng ký thành viên mới', 'danger');
+                    }
+                });
+            });
+
+            function formatWithDots(number) {
+                return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            }
+
+            function formatMoney(amount) {
+                return amount.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+        });
+    </script>
 </body>
-</html> 
+</html>

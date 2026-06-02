@@ -1,5 +1,6 @@
 package ntu.vinh.banhang.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.util.List;
@@ -15,12 +16,13 @@ public class Customer {
     @Column(nullable = false)
     private String name;
 
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     private String phone;
 
     private String email;
 
     @OneToMany(mappedBy = "customer")
+    @JsonIgnore
     private List<Invoice> invoices;
 
     // Explicit getters and setters for id

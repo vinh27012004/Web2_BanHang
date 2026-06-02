@@ -5,55 +5,89 @@
 <body>
     <div th:replace="~{fragments/header :: header}"></div>
 
-    <div class="container mt-4">
-        <h2 class="mb-3">Chi tiết đơn hàng #<span th:text="${order.id}"></span></h2>
-
-        <div class="card mb-4">
-            <div class="card-header">
-                Thông tin chung
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="page-title" th:text="'Chi tiết hóa đơn #' + ${order.id}"></h1>
+                <p class="page-subtitle mb-0">Hóa đơn bán hàng điện tử chính thức từ hệ thống POS-BANHANG</p>
             </div>
-            <div class="card-body">
-                <p><strong>Ngày tạo:</strong> <span th:text="${#temporals.format(order.createdAt, 'dd-MM-yyyy HH:mm')}"></span></p>
-                <p><strong>Người bán:</strong> <span th:text="${order.user.fullName}"></span></p>
-                <p><strong>Khách hàng:</strong> 
-                    <span th:if="${order.customer}" th:text="${order.customer.name + ' - ' + order.customer.phone}"></span>
-                    <span th:unless="${order.customer}">Khách lẻ</span>
-                </p>
-                <p><strong>Tổng tiền:</strong> <span th:text="${#numbers.formatCurrency(order.totalAmount)}"></span></p>
-                <p><strong>Khách trả:</strong> <span th:text="${#numbers.formatCurrency(order.customerPaid)}"></span></p>
-                <p><strong>Tiền thối:</strong> <span th:text="${#numbers.formatCurrency(order.changeAmount)}"></span></p>
-            </div>
+            <a href="/order" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Danh sách hóa đơn
+            </a>
         </div>
 
-        <div class="card mb-4">
-            <div class="card-header">
-                Sản phẩm trong đơn hàng
+        <div class="row g-4">
+            <!-- Cột bên trái: Chi tiết giao dịch/Thông tin chung -->
+            <div class="col-md-5">
+                <div class="card border-0 shadow-sm overflow-hidden mb-4">
+                    <div class="card-header bg-light border-0">
+                        <span class="fw-bold text-dark"><i class="bi bi-info-circle text-primary me-2"></i> Tóm tắt hóa đơn</span>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="d-flex flex-column gap-3">
+                            <div class="d-flex justify-content-between border-bottom pb-2">
+                                <span class="text-secondary small">Ngày giờ xuất:</span>
+                                <span class="fw-semibold text-dark" th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+                            </div>
+                            <div class="d-flex justify-content-between border-bottom pb-2">
+                                <span class="text-secondary small">Thu ngân phục vụ:</span>
+                                <span class="fw-semibold text-dark" th:text="${order.user.fullName}"></span>
+                            </div>
+                            <div class="d-flex justify-content-between border-bottom pb-2">
+                                <span class="text-secondary small">Khách hàng nhận:</span>
+                                <span class="fw-semibold text-dark" th:if="${order.customer}" th:text="${order.customer.name + ' - ' + order.customer.phone}"></span>
+                                <span class="text-muted small" th:unless="${order.customer}"><i class="bi bi-person-dash me-1"></i> Khách vãng lai</span>
+                            </div>
+                            <div class="d-flex justify-content-between border-bottom pb-2">
+                                <span class="text-secondary small">Tổng tiền hàng:</span>
+                                <span class="fw-bold text-dark" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></span>
+                            </div>
+                            <div class="d-flex justify-content-between border-bottom pb-2">
+                                <span class="text-secondary small">Tiền mặt khách đưa:</span>
+                                <span class="fw-bold text-success" th:text="${#numbers.formatDecimal(order.customerPaid, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-secondary small">Số tiền thối lại:</span>
+                                <span class="fw-extrabold text-primary" th:text="${#numbers.formatDecimal(order.changeAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button onclick="window.print()" class="btn btn-outline-primary py-3"><i class="bi bi-printer me-2"></i> In hóa đơn (PDF)</button>
+                    <a href="/products" class="btn btn-primary py-3"><i class="bi bi-cart-plus-fill me-2"></i> Lập hóa đơn mới</a>
+                </div>
             </div>
-            <div class="card-body">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Sản phẩm</th>
-                            <th>Số lượng</th>
-                            <th>Đơn giá</th>
-                            <th>Thành tiền</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="item : ${order.items}">
-                            <td th:text="${item.product.name}"></td>
-                            <td th:text="${item.quantity}"></td>
-                            <td th:text="${#numbers.formatCurrency(item.unitPrice)}"></td>
-                            <td th:text="${#numbers.formatCurrency(item.totalPrice)}"></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
 
-        <div class="text-end">
-            <a href="/order" class="btn btn-secondary">Quay lại danh sách đơn hàng</a>
+            <!-- Cột bên phải: Danh sách mặt hàng bán lẻ -->
+            <div class="col-md-7">
+                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-list-stars text-primary me-2"></i> Danh sách mặt hàng mua</h5>
+                <div class="table-container border-0 shadow-sm">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Sản phẩm</th>
+                                <th class="text-end" style="width: 100px;">Đơn giá</th>
+                                <th class="text-center" style="width: 100px;">Số lượng</th>
+                                <th class="text-end" style="width: 130px;">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="item : ${order.items}">
+                                <td>
+                                    <div class="fw-bold text-dark" th:text="${item.product.name}"></div>
+                                    <small class="text-secondary text-uppercase" th:text="${item.product.code}"></small>
+                                </td>
+                                <td class="text-end text-secondary" th:text="${#numbers.formatDecimal(item.unitPrice, 0, 'COMMA', 0, 'POINT')} + 'đ'"></td>
+                                <td class="text-center fw-semibold" th:text="${item.quantity}"></td>
+                                <td class="text-end fw-bold text-dark" th:text="${#numbers.formatDecimal(item.totalPrice, 0, 'COMMA', 0, 'POINT')} + 'đ'"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </body>
-</html> 
+</html>
