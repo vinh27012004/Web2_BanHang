@@ -12,6 +12,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import jakarta.servlet.http.HttpSession;
 import ntu.vinh.banhang.entity.Product;
+import ntu.vinh.banhang.exception.BusinessException;
+import ntu.vinh.banhang.exception.ResourceNotFoundException;
 import ntu.vinh.banhang.model.CartItem;
 import ntu.vinh.banhang.repository.ProductRepository;
 import ntu.vinh.banhang.service.CartService;
@@ -38,10 +40,10 @@ public class CartServiceImpl implements CartService {
     @Override
     public void addToCart(Long productId, Integer quantity) {
         Product product = productRepository.findById(productId)
-            .orElseThrow(() -> new RuntimeException("Product not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm"));
 
         if (product.getQuantity() < quantity) {
-            throw new RuntimeException("Insufficient stock");
+            throw new BusinessException("Số lượng vượt quá tồn kho hiện có");
         }
 
         Map<Long, CartItem> cartItems = getCartItemsFromSession();
@@ -49,7 +51,7 @@ public class CartServiceImpl implements CartService {
             if (existingItem != null) {
                 int newQuantity = existingItem.getQuantity() + quantity;
                 if (product.getQuantity() < newQuantity) {
-                    throw new RuntimeException("Insufficient stock");
+                    throw new BusinessException("Số lượng vượt quá tồn kho hiện có");
                 }
                 existingItem.setQuantity(newQuantity);
                 return existingItem;
@@ -67,10 +69,10 @@ public class CartServiceImpl implements CartService {
     @Override
     public void updateQuantity(Long productId, Integer quantity) {
         Product product = productRepository.findById(productId)
-            .orElseThrow(() -> new RuntimeException("Product not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm"));
 
         if (product.getQuantity() < quantity) {
-            throw new RuntimeException("Insufficient stock");
+            throw new BusinessException("Số lượng vượt quá tồn kho hiện có");
         }
 
         Map<Long, CartItem> cartItems = getCartItemsFromSession();

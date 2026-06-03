@@ -1,6 +1,9 @@
 package ntu.vinh.banhang.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 @Entity
@@ -10,13 +13,17 @@ public class StockEntry {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull(message = "Vui lòng chọn sản phẩm")
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
+    @NotNull(message = "Số lượng nhập không được để trống")
+    @Positive(message = "Số lượng nhập phải lớn hơn 0")
     @Column(nullable = false)
     private Integer quantity;
 
+    @Size(max = 500, message = "Ghi chú tối đa 500 ký tự")
     @Column(length = 500)
     private String note;
 

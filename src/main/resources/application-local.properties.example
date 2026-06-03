@@ -1,0 +1,11 @@
+# Mẫu cấu hình cục bộ.
+# Sao chép file này thành "application-local.properties" rồi điền thông tin thật.
+# File application-local.properties đã được .gitignore bỏ qua nên sẽ KHÔNG bị commit.
+#
+# Cách kích hoạt profile local khi chạy:
+#   mvnw spring-boot:run -Dspring-boot.run.profiles=local
+# hoặc đặt biến môi trường: SPRING_PROFILES_ACTIVE=local
+
+spring.datasource.url=jdbc:mysql://localhost:3306/banhang
+spring.datasource.username=root
+spring.datasource.password=YOUR_DB_PASSWORD_HERE

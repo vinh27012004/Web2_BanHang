@@ -3,7 +3,9 @@ package ntu.vinh.banhang.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 import ntu.vinh.banhang.entity.Customer;
 import ntu.vinh.banhang.service.CustomerService;
 import java.util.List;
@@ -29,7 +31,10 @@ public class CustomerController {
     }
 
     @PostMapping("/add")
-    public String addCustomer(@ModelAttribute Customer customer) {
+    public String addCustomer(@Valid @ModelAttribute Customer customer, BindingResult result) {
+        if (result.hasErrors()) {
+            return "customer/form";
+        }
         customerService.saveCustomer(customer);
         return "redirect:/customers";
     }
@@ -42,7 +47,10 @@ public class CustomerController {
     }
 
     @PostMapping("/edit/{id}")
-    public String updateCustomer(@PathVariable Long id, @ModelAttribute Customer customer) {
+    public String updateCustomer(@PathVariable Long id, @Valid @ModelAttribute Customer customer, BindingResult result) {
+        if (result.hasErrors()) {
+            return "customer/form";
+        }
         customer.setId(id);
         customerService.saveCustomer(customer);
         return "redirect:/customers";

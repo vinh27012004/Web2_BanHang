@@ -31,3 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Cấu hình cục bộ / nhạy cảm (không commit) ###
+application-local.properties
+src/main/resources/application-local.properties
+*.env
+.env

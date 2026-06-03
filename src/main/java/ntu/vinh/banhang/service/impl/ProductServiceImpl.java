@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ntu.vinh.banhang.entity.Product;
+import ntu.vinh.banhang.exception.ResourceNotFoundException;
 import ntu.vinh.banhang.repository.ProductRepository;
 import ntu.vinh.banhang.service.CartService;
 import ntu.vinh.banhang.service.ProductService;
@@ -32,7 +33,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product getProductById(Long id) {
         return productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm với ID: " + id));
     }
 
     @Override

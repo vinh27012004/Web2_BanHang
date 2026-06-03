@@ -19,6 +19,8 @@ import ntu.vinh.banhang.entity.InvoiceItem;
 import ntu.vinh.banhang.entity.Product;
 import ntu.vinh.banhang.entity.Customer;
 import ntu.vinh.banhang.entity.User;
+import ntu.vinh.banhang.exception.BusinessException;
+import ntu.vinh.banhang.exception.ResourceNotFoundException;
 import ntu.vinh.banhang.model.CartItem;
 import ntu.vinh.banhang.repository.InvoiceRepository;
 import ntu.vinh.banhang.repository.ProductRepository;
@@ -48,7 +50,7 @@ public class OrderServiceImpl implements OrderService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         User currentUser = userRepository.findByUsername(username)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng hiện tại"));
         invoice.setUser(currentUser);
         
         // Tải trước tất cả sản phẩm liên quan bằng một truy vấn duy nhất (Batch Fetching)
@@ -66,11 +68,11 @@ public class OrderServiceImpl implements OrderService {
             Long productId = cartItem.getProduct().getId();
             Product product = productMap.get(productId);
             if (product == null) {
-                throw new RuntimeException("Product not found with ID: " + productId);
+                throw new ResourceNotFoundException("Không tìm thấy sản phẩm với ID: " + productId);
             }
-            
+
             if (product.getQuantity() < cartItem.getQuantity()) {
-                throw new RuntimeException("Insufficient stock for product: " + product.getName());
+                throw new BusinessException("Không đủ tồn kho cho sản phẩm: " + product.getName());
             }
             
             InvoiceItem invoiceItem = new InvoiceItem();
@@ -98,7 +100,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Invoice getOrder(Long id) {
         return invoiceRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Order not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hóa đơn với ID: " + id));
     }
 
     @Override

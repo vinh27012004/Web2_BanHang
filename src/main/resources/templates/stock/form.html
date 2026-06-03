@@ -30,6 +30,7 @@
                                             th:text="${product.name + ' - [' + product.code + ']' + ' (Hiện có: ' + product.quantity + ')'}">
                                     </option>
                                 </select>
+                                <div class="text-danger small mt-1" th:if="${#fields.hasErrors('product')}" th:errors="*{product}"></div>
                             </div>
                             
                             <!-- Số lượng -->
@@ -39,6 +40,7 @@
                                     <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-boxes"></i></span>
                                     <input type="number" class="form-control border-start-0 ps-0" id="quantity" th:field="*{quantity}" required min="1" placeholder="Nhập số lượng hàng thêm vào kho...">
                                 </div>
+                                <div class="text-danger small mt-1" th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}"></div>
                             </div>
                             
                             <!-- Ghi chú -->

@@ -28,23 +28,15 @@ public class CartController {
     @PostMapping("/add")
     @ResponseBody
     public String addToCart(@RequestParam Long productId, @RequestParam Integer quantity) {
-        try {
-            cartService.addToCart(productId, quantity);
-            return "success";
-        } catch (Exception e) {
-            return "error: " + e.getMessage();
-        }
+        cartService.addToCart(productId, quantity);
+        return "success";
     }
 
     @PostMapping("/update")
     @ResponseBody
     public String updateQuantity(@RequestParam Long productId, @RequestParam Integer quantity) {
-        try {
-            cartService.updateQuantity(productId, quantity);
-            return "success";
-        } catch (Exception e) {
-            return "error: " + e.getMessage();
-        }
+        cartService.updateQuantity(productId, quantity);
+        return "success";
     }
 
     @PostMapping("/remove")

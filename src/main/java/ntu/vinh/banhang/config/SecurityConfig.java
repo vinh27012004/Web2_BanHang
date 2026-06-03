@@ -2,6 +2,7 @@ package ntu.vinh.banhang.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -16,13 +17,19 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                // Public URLs
-                .requestMatchers("/", "/products", "/cart/**", "/css/**", "/js/**", "/images/**").permitAll()
-                // Admin URLs
+                // Tài nguyên tĩnh + trang đăng nhập: ai cũng truy cập được
+                .requestMatchers("/", "/login", "/css/**", "/js/**", "/images/**").permitAll()
+                // Xem danh sách / chi tiết sản phẩm: công khai
+                .requestMatchers(HttpMethod.GET, "/products", "/products/*").permitAll()
+                // Giỏ hàng (bao gồm thêm vào giỏ qua /products/{id}/add-to-cart): công khai
+                .requestMatchers("/cart/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/products/*/add-to-cart").permitAll()
+                // Tạo / sửa / xóa sản phẩm và quản lý kho: chỉ ADMIN
+                .requestMatchers(HttpMethod.POST, "/products/add", "/products/*/update", "/products/*/delete").hasRole("ADMIN")
                 .requestMatchers("/admin/**", "/stock/**").hasRole("ADMIN")
-                // Staff & Admin URLs
+                // Hóa đơn & khách hàng: STAFF hoặc ADMIN
                 .requestMatchers("/order/**", "/customers/**").hasAnyRole("ADMIN", "STAFF")
-                // Other URLs require authentication
+                // Còn lại yêu cầu đăng nhập
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
