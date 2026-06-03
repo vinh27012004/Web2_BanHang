@@ -9,3 +9,9 @@
 spring.datasource.url=jdbc:mysql://localhost:3306/banhang
 spring.datasource.username=root
 spring.datasource.password=YOUR_DB_PASSWORD_HERE
+
+# (Tùy chọn) Tài khoản nhận tiền cho thanh toán QR (VietQR).
+# Bỏ trống account-no nếu chưa muốn bật QR.
+vietqr.bank-bin=970415
+vietqr.account-no=YOUR_ACCOUNT_NUMBER
+vietqr.account-name=TEN CHU TAI KHOAN

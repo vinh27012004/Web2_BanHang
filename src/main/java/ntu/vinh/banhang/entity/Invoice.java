@@ -35,6 +35,10 @@ public class Invoice {
     @Column(name = "change_amount", nullable = false)
     private Double changeAmount;
 
+    /** Hình thức thanh toán: CASH (tiền mặt) hoặc QR (chuyển khoản VietQR). */
+    @Column(name = "payment_method", nullable = false, length = 20)
+    private String paymentMethod = "CASH";
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

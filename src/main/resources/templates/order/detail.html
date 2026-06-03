@@ -39,14 +39,23 @@
                                 <span class="text-muted small" th:unless="${order.customer}"><i class="bi bi-person-dash me-1"></i> Khách vãng lai</span>
                             </div>
                             <div class="d-flex justify-content-between border-bottom pb-2">
+                                <span class="text-secondary small">Hình thức thanh toán:</span>
+                                <span th:if="${order.paymentMethod == 'QR'}" class="badge bg-info text-dark">
+                                    <i class="bi bi-qr-code me-1"></i> Chuyển khoản QR
+                                </span>
+                                <span th:unless="${order.paymentMethod == 'QR'}" class="badge bg-success">
+                                    <i class="bi bi-cash-coin me-1"></i> Tiền mặt
+                                </span>
+                            </div>
+                            <div class="d-flex justify-content-between border-bottom pb-2">
                                 <span class="text-secondary small">Tổng tiền hàng:</span>
                                 <span class="fw-bold text-dark" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></span>
                             </div>
                             <div class="d-flex justify-content-between border-bottom pb-2">
-                                <span class="text-secondary small">Tiền mặt khách đưa:</span>
+                                <span class="text-secondary small" th:text="${order.paymentMethod == 'QR'} ? 'Khách đã chuyển khoản:' : 'Tiền mặt khách đưa:'"></span>
                                 <span class="fw-bold text-success" th:text="${#numbers.formatDecimal(order.customerPaid, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></span>
                             </div>
-                            <div class="d-flex justify-content-between">
+                            <div class="d-flex justify-content-between" th:unless="${order.paymentMethod == 'QR'}">
                                 <span class="text-secondary small">Số tiền thối lại:</span>
                                 <span class="fw-extrabold text-primary" th:text="${#numbers.formatDecimal(order.changeAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></span>
                             </div>

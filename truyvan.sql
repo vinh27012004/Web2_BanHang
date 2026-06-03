@@ -49,6 +49,7 @@ CREATE TABLE invoice (
     total_amount DOUBLE NOT NULL,
     customer_paid DOUBLE NOT NULL,
     change_amount DOUBLE NOT NULL,
+    payment_method VARCHAR(20) NOT NULL DEFAULT 'CASH',
     user_id BIGINT NOT NULL,
     customer_id BIGINT,
     FOREIGN KEY (user_id) REFERENCES user(id),

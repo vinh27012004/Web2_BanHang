@@ -76,13 +76,31 @@ class OrderServiceImplTest {
         when(productRepository.findAllById(anyList())).thenReturn(List.of(p));
         when(invoiceRepository.save(any(Invoice.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Invoice invoice = orderService.createOrder(List.of(item), new Customer(), 50000d);
+        Invoice invoice = orderService.createOrder(List.of(item), new Customer(), 50000d, "CASH");
 
         assertThat(invoice.getTotalAmount()).isEqualTo(30000d);
         assertThat(invoice.getChangeAmount()).isEqualTo(20000d);
+        assertThat(invoice.getPaymentMethod()).isEqualTo("CASH");
         assertThat(invoice.getItems()).hasSize(1);
         // Tồn kho phải bị trừ từ 100 xuống 97
         assertThat(p.getQuantity()).isEqualTo(97);
+    }
+
+    @Test
+    void createOrder_thanhToanQR_khongCoTienThua() {
+        Product p = product(1L, 10000d, 100);
+        CartItem item = new CartItem(p, 2); // 20.000
+
+        when(userRepository.findByUsername("admin")).thenReturn(Optional.of(currentUser));
+        when(productRepository.findAllById(anyList())).thenReturn(List.of(p));
+        when(invoiceRepository.save(any(Invoice.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        // Thanh toán QR: customerPaid bằng đúng tổng tiền, không có tiền thừa
+        Invoice invoice = orderService.createOrder(List.of(item), new Customer(), 20000d, "QR");
+
+        assertThat(invoice.getPaymentMethod()).isEqualTo("QR");
+        assertThat(invoice.getChangeAmount()).isEqualTo(0d);
+        assertThat(invoice.getTotalAmount()).isEqualTo(20000d);
     }
 
     @Test
@@ -93,7 +111,7 @@ class OrderServiceImplTest {
         when(userRepository.findByUsername("admin")).thenReturn(Optional.of(currentUser));
         when(productRepository.findAllById(anyList())).thenReturn(List.of(p));
 
-        assertThatThrownBy(() -> orderService.createOrder(List.of(item), new Customer(), 100000d))
+        assertThatThrownBy(() -> orderService.createOrder(List.of(item), new Customer(), 100000d, "CASH"))
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("Không đủ tồn kho");
     }

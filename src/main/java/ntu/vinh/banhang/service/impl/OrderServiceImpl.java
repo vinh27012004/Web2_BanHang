@@ -41,10 +41,11 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public Invoice createOrder(List<CartItem> cartItems, Customer customer, Double customerPaid) {
+    public Invoice createOrder(List<CartItem> cartItems, Customer customer, Double customerPaid, String paymentMethod) {
         Invoice invoice = new Invoice();
         invoice.setCreatedAt(LocalDateTime.now());
         invoice.setCustomer(customer);
+        invoice.setPaymentMethod("QR".equals(paymentMethod) ? "QR" : "CASH");
         
         // Lấy thông tin người dùng hiện tại
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

@@ -18,7 +18,8 @@
 
 ## ✨ Tính năng chính
 
-- **Bán hàng (POS):** giỏ hàng theo phiên, thanh toán, tự động tính tiền thừa và trừ tồn kho trong một giao dịch (`@Transactional`).
+- **Bán hàng (POS):** giỏ hàng theo phiên, thanh toán **tiền mặt** (tự tính tiền thừa) hoặc **chuyển khoản VietQR**, trừ tồn kho trong một giao dịch (`@Transactional`).
+- **Thanh toán QR (VietQR):** tự sinh mã QR chuẩn EMVCo/NAPAS ngay trong ứng dụng (ZXing, không cần dịch vụ ngoài); nhân viên xác nhận thủ công khi tiền về.
 - **Quản lý sản phẩm:** thêm / sửa / xóa, tìm kiếm & lọc theo giá ngay trên trình duyệt.
 - **Quản lý kho:** tạo phiếu nhập kho, xem lịch sử nhập theo từng sản phẩm, cảnh báo tồn kho thấp.
 - **Quản lý khách hàng:** thêm nhanh khi thanh toán, tìm theo số điện thoại.
@@ -71,6 +72,19 @@ thành `application-local.properties`, điền thông tin thật, rồi chạy v
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 ```
 > File `application-local.properties` đã được `.gitignore` bỏ qua nên mật khẩu của bạn sẽ không bị đẩy lên git.
+
+### 3b. (Tùy chọn) Bật thanh toán QR — VietQR
+Khai báo tài khoản nhận tiền để hiển thị lựa chọn "Chuyển khoản QR" ở màn hình thanh toán. Có thể đặt qua biến môi trường hoặc trong `application-local.properties`:
+
+```properties
+vietqr.bank-bin=970415          # Mã BIN ngân hàng theo chuẩn NAPAS
+vietqr.account-no=0123456789    # Số tài khoản nhận tiền
+vietqr.account-name=NGUYEN VAN A
+```
+
+Một số mã BIN thông dụng: `970415` VietinBank · `970436` Vietcombank · `970418` BIDV · `970405` Agribank · `970422` MBBank · `970407` Techcombank · `970432` VPBank.
+
+> Nếu để trống `vietqr.account-no`, giao diện sẽ ẩn lựa chọn QR và chỉ dùng tiền mặt. Mã QR được sinh **offline** trong ứng dụng; nhân viên xác nhận thủ công khi thấy tiền về (dự án không tự đối soát qua webhook).
 
 ### 4. Chạy ứng dụng
 ```bash
