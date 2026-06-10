@@ -41,6 +41,10 @@ public class Product {
     @Column(nullable = false)
     private Integer quantity;
 
+    @Size(max = 255, message = "Tên file ảnh tối đa 255 ký tự")
+    @Column(length = 255)
+    private String image;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -88,6 +92,14 @@ public class Product {
 
     public void setQuantity(Integer quantity) {
         this.quantity = quantity;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 
     public LocalDateTime getCreatedAt() {

@@ -18,7 +18,7 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 // Tài nguyên tĩnh + trang đăng nhập: ai cũng truy cập được
-                .requestMatchers("/", "/login", "/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers("/", "/login", "/css/**", "/js/**", "/images/**", "/image/**").permitAll()
                 // Xem danh sách / chi tiết sản phẩm: công khai
                 .requestMatchers(HttpMethod.GET, "/products", "/products/*").permitAll()
                 // Giỏ hàng (bao gồm thêm vào giỏ qua /products/{id}/add-to-cart): công khai

@@ -69,6 +69,16 @@
                                     <input type="number" class="form-control" id="quantity" name="quantity" min="0" placeholder="Số lượng..." required>
                                 </div>
                             </div>
+                            <div class="mb-1">
+                                <label for="image" class="form-label">Ảnh sản phẩm</label>
+                                <select class="form-select" id="image" name="image">
+                                    <option value="">-- Không có ảnh --</option>
+                                    <option th:each="img : ${availableImages}" th:value="${img}" th:text="${img}"></option>
+                                </select>
+                                <div class="text-center mt-2">
+                                    <img id="imagePreview" src="" alt="Xem trước ảnh" class="img-fluid rounded d-none" style="max-height: 120px;">
+                                </div>
+                            </div>
                         </form>
                     </div>
                     <div class="modal-footer">
@@ -86,11 +96,20 @@
                  th:data-code="${#strings.toLowerCase(product.code)}"
                  th:data-price="${product.price}">
                 <div class="card h-100 border-0 shadow-sm">
-                    <!-- Product Graphic Header (No actual images, let's make a beautiful card header with gradient) -->
-                    <div class="card-header-gradient d-flex align-items-center justify-content-center" 
-                         style="height: 120px; background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);">
-                        <i class="bi bi-box-seam" style="font-size: 3rem; color: #6366f1;"></i>
-                    </div>
+                    <!-- Ảnh sản phẩm: nếu có ảnh thì hiển thị, không thì dùng header gradient -->
+                    <a th:href="@{'/products/' + ${product.id}}" class="text-decoration-none">
+                        <div th:if="${product.image != null and !product.image.isEmpty()}"
+                             class="d-flex align-items-center justify-content-center bg-white overflow-hidden"
+                             style="height: 180px;">
+                            <img th:src="@{'/image/' + ${product.image}}" th:alt="${product.name}"
+                                 class="img-fluid" style="max-height: 180px; object-fit: contain;">
+                        </div>
+                        <div th:unless="${product.image != null and !product.image.isEmpty()}"
+                             class="card-header-gradient d-flex align-items-center justify-content-center"
+                             style="height: 180px; background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);">
+                            <i class="bi bi-box-seam" style="font-size: 3rem; color: #6366f1;"></i>
+                        </div>
+                    </a>
                     
                     <div class="card-body d-flex flex-column">
                         <div class="d-flex justify-content-between align-items-start mb-2">
@@ -151,6 +170,17 @@
         $(document).ready(function() {
             var token = $("meta[name='_csrf']").attr("content");
             var header = $("meta[name='_csrf_header']").attr("content");
+
+            // Xem trước ảnh khi chọn trong dropdown
+            $('#image').on('change', function() {
+                var file = $(this).val();
+                var preview = $('#imagePreview');
+                if (file) {
+                    preview.attr('src', '/image/' + file).removeClass('d-none');
+                } else {
+                    preview.attr('src', '').addClass('d-none');
+                }
+            });
 
             // Xử lý thêm vào giỏ hàng
             $('.add-to-cart').click(function() {
@@ -231,6 +261,7 @@
             var name = $('#name').val().trim();
             var price = $('#price').val();
             var quantity = $('#quantity').val();
+            var image = $('#image').val();
 
             if (!code || !name || !price || !quantity) {
                 showToast('Thiếu thông tin', 'Vui lòng nhập đầy đủ tất cả các trường', 'warning');
@@ -241,7 +272,8 @@
                 code: code,
                 name: name,
                 price: price,
-                quantity: quantity
+                quantity: quantity,
+                image: image
             };
 
             $.ajax({

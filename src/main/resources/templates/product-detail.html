@@ -14,7 +14,13 @@
                 
                 <div class="card border-0 shadow-sm overflow-hidden">
                     <div class="row g-0">
-                        <div class="col-md-5 d-flex align-items-center justify-content-center p-5" style="background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);">
+                        <div th:if="${product.image != null and !product.image.isEmpty()}"
+                             class="col-md-5 d-flex align-items-center justify-content-center p-4 bg-white">
+                            <img th:src="@{'/image/' + ${product.image}}" th:alt="${product.name}"
+                                 class="img-fluid" style="max-height: 320px; object-fit: contain;">
+                        </div>
+                        <div th:unless="${product.image != null and !product.image.isEmpty()}"
+                             class="col-md-5 d-flex align-items-center justify-content-center p-5" style="background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);">
                             <i class="bi bi-box-seam" style="font-size: 5rem; color: #6366f1;"></i>
                         </div>
                         <div class="col-md-7 p-4">
